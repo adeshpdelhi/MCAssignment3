@@ -8,7 +8,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
 
-    tools:context="com.creation.adesh.mcassignment2.CheatActivity">
+    tools:context="com.creation.adesh.mcassignment3.CheatActivity">
     <TextView
         android:id="@+id/cheatView"
         android:layout_width="wrap_content"

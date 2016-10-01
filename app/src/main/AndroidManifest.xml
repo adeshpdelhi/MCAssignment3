@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.creation.adesh.mcassignment3">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -15,10 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CheatActivity"
-            android:label="@string/cheatText"/>
-        <activity android:name=".HintActivity"
-            android:label="@string/hintText"/>
+        <activity
+            android:name=".CheatActivity"
+            android:label="@string/cheatText" />
+        <activity
+            android:name=".HintActivity"
+            android:label="@string/hintText" />
+        <activity android:name="com.creation.adesh.mcassignment3.ViewLogsActivity"></activity>
     </application>
 
 </manifest>
