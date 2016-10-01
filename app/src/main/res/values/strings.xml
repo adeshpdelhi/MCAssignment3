@@ -1,0 +1,14 @@
+<resources>
+    <string name="appName">Math Quiz 2</string>
+    <string name="trueText">True</string>
+    <string name="falseText">False</string>
+    <string name="nextText">Next</string>
+    <string name="hintText">Hint</string>
+    <string name="cheatText">Cheat</string>
+    <string name="confirmCheatText">Do you really want to cheat?</string>
+    <string name="confirmHintText">Do you really want to see hint?</string>
+    <string name="hint">Try to factorize the number!</string>
+    <string name="questionText">%1$s is a prime number.</string>
+    <string name="answerPrimeText">Prime number!</string>
+    <string name="answerNonPrimeText">Not a prime number!</string>
+</resources>
