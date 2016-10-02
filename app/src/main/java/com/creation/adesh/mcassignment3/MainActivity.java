@@ -131,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         }
     }
 
-
     private void updateUserFromId(){
     SQLiteDatabase userDb = mUserDbHelper.getReadableDatabase();
     String columns[] = {UserContract.User._ID,UserContract.User.ColumnName,UserContract.User.ColumnHighScore};
@@ -147,9 +146,7 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         Integer highScore = c.getInt(
                 c.getColumnIndexOrThrow(UserContract.User.ColumnHighScore)
         );
-
         user = new User(_ID, name, highScore);
-
         mUsername.setText(user.getName());
         mHighScore.setText(user.getHighScore().toString());
 
@@ -167,23 +164,23 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         String sort = UserContract.User._ID + " DESC";
         Cursor c = userDb.query(UserContract.User.tableName, columns, selection, args,null,null,sort );
         if( c != null && c.moveToFirst() ) {
-
             _ID = c.getLong(
                     c.getColumnIndexOrThrow(UserContract.User._ID)
             );
             Integer highScore = c.getInt(
                     c.getColumnIndexOrThrow(UserContract.User.ColumnHighScore)
             );
-
             user = new User(_ID,name, highScore);
-
             mUsername.setText(user.getName());
             mHighScore.setText(user.getHighScore().toString());
             score = 0;
             mScore.setText(score.toString());
+            Toast.makeText(getApplicationContext(),"Switched to "+name+" successfully",Toast.LENGTH_SHORT).show();
         }
-        else
+        else {
             Log.e(LOG_TAG, "SwitchUser Updation Error!");
+            Toast.makeText(getApplicationContext(),"User does not exist!", Toast.LENGTH_SHORT).show();
+        }
         next(null);
     }
 
@@ -197,12 +194,13 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         score = 0;
         mScore.setText(score.toString());
         next(null);
+        Toast.makeText(getApplicationContext(),"User "+name+" added successfully",Toast.LENGTH_SHORT).show();
     }
 
     public void deleteUser(String name){
         if(name.equals(user.getName()))
         {
-            Toast.makeText(getApplicationContext(),"Cannot delete present user!",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Cannot delete active user!",Toast.LENGTH_SHORT).show();
             return;
         }
         SQLiteDatabase userDb = mUserDbHelper.getWritableDatabase();
@@ -218,85 +216,39 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
     }
     private void addToLog(){
         addToPrivateLog();
-        addToPublicVolatileLog();
         addToPublicLog();
-        addToPublicExternalLog();
     }
     private void addToPrivateLog(){
-        try {
             File file = new File(getApplicationContext().getFilesDir(), logfileName);
-            if (!file.exists())
-                file.createNewFile();
-            FileWriter fw = new FileWriter(file, true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(presentQuestion.getNumber() + ": " + presentQuestion.getAnswer() + "\n");
-            bw.close();
-            Log.v(LOG_TAG, "Added private log successfully");
-        }
-        catch (Exception e) {
-            Log.e(LOG_TAG, "Error saving private log");
-        }
+        writeToFile(file,"private");
     }
     private void addToPublicLog(){
         if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
             return;
-        try {
-            File file = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOCUMENTS), logfileName);
-            if (!file.exists())
-                file.createNewFile();
-            FileWriter fw = new FileWriter(file, true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            if(presentQuestion.getAnswer())
-                bw.write(presentQuestion.getNumber() + " is a prime number.\n");
-            else
-                bw.write(presentQuestion.getNumber() + " is not a prime number.\n");
-            bw.close();
-            Log.v(LOG_TAG, "Added public log successfully");
-        }
-        catch (Exception e) {
-            Log.e(LOG_TAG, "Error saving public log "+e.getMessage()+" "+e.getCause());
-        }
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), logfileName);
+        writeToFile(file,"public");
+        file = new File(getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), logfileName);
+        writeToFile(file,"private");
+        file = new File(Environment.getExternalStorageDirectory(), logfileName);
+        writeToFile(file,"public");
     }
-    private void addToPublicVolatileLog(){
-        if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
-            return;
+    private void writeToFile(File file,String mode){
         try {
-            File file = new File(getApplicationContext().getExternalFilesDir(
-                    Environment.DIRECTORY_DOCUMENTS), logfileName);
             if (!file.exists())
                 file.createNewFile();
             FileWriter fw = new FileWriter(file, true);
             BufferedWriter bw = new BufferedWriter(fw);
-            if(presentQuestion.getAnswer())
+            if(mode.equals("private"))
+                bw.write(presentQuestion.getNumber() + ": " + presentQuestion.getAnswer() + "\n");
+            else if(presentQuestion.getAnswer())
                 bw.write(presentQuestion.getNumber() + " is a prime number.\n");
             else
                 bw.write(presentQuestion.getNumber() + " is not a prime number.\n");
             bw.close();
-            Log.v(LOG_TAG, "Added public volatile log successfully");
+            Log.v(LOG_TAG, "Saved log successfully");
         }
         catch (Exception e) {
-            Log.e(LOG_TAG, "Error saving public volatile log "+e.getMessage()+" "+e.getCause());
-        }
-    }
-    private void addToPublicExternalLog(){
-        if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
-            return;
-        try {
-            File file = new File(Environment.getExternalStorageDirectory(), logfileName);
-            if (!file.exists())
-                file.createNewFile();
-            FileWriter fw = new FileWriter(file, true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            if(presentQuestion.getAnswer())
-                bw.write(presentQuestion.getNumber() + " is a prime number.\n");
-            else
-                bw.write(presentQuestion.getNumber() + " is not a prime number.\n");
-            bw.close();
-            Log.v(LOG_TAG, "Added public external log successfully");
-        }
-        catch (Exception e) {
-            Log.e(LOG_TAG, "Error saving public external log "+e.getMessage()+" "+e.getCause());
+            Log.e(LOG_TAG, "Error saving log "+e.getMessage()+" "+e.getCause());
         }
     }
     @Override
@@ -335,7 +287,6 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
 
     }
 
-
     private void checkCheating(){
         if(mCheated)
             Toast.makeText(getApplicationContext(),"You already cheated!",Toast.LENGTH_SHORT).show();
@@ -364,14 +315,15 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         startActivityForResult(i,cheatRequestCode);
     }
     private void updateProgress(){
-        if(score>user.getHighScore())
+        if(score>user.getHighScore()) {
+            Toast.makeText(getApplicationContext(),"High score updated successfully",Toast.LENGTH_SHORT).show();
             user.setHighScore(score);
+        }
         mHighScore.setText(user.getHighScore().toString());
         new UpdateProgressTask(getApplicationContext()).execute(user,null,null);
     }
     @Override
     protected void onDestroy() {
-
         SharedPreferences sharedPref = this.getSharedPreferences("score", Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
         sharedEditor.putInt(RScore,score);
