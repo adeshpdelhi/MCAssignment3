@@ -28,9 +28,12 @@ public class ViewLogsActivity extends AppCompatActivity {
         super.onResume();
         if(getIntent().getStringExtra("type").equals("private"))
             getPrivateLogs();
-        else
+        else if (getIntent().getStringExtra("type").equals("public"))
             getPublicLogs();
-
+        else if (getIntent().getStringExtra("type").equals("publicvolatile"))
+            getPublicVolatileLogs();
+        else if (getIntent().getStringExtra("type").equals("publicexternal"))
+            getPublicExternalLogs();
     }
 
     private void getPrivateLogs(){
@@ -42,6 +45,18 @@ public class ViewLogsActivity extends AppCompatActivity {
             return;
 
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), logfileName);
+        display(file);
+    }
+    private void getPublicVolatileLogs(){
+        if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+            return;
+        File file = new File(getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), logfileName);
+        display(file);
+    }
+    private void getPublicExternalLogs(){
+        if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+            return;
+        File file = new File(Environment.getExternalStorageDirectory(), logfileName);
         display(file);
     }
     private void display(File file) {

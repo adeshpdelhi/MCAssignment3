@@ -105,6 +105,12 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
             case R.id.viewpubliclogs:
                 startActivity(new Intent(this, ViewLogsActivity.class).putExtra("type","public"));
                 return true;
+            case R.id.viewpublicvolatilelogs:
+                startActivity(new Intent(this, ViewLogsActivity.class).putExtra("type","publicvolatile"));
+                return true;
+            case R.id.viewpublicexternallogs:
+                startActivity(new Intent(this, ViewLogsActivity.class).putExtra("type","publicexternal"));
+                return true;
             case R.id.adduser:
                 FragmentManager fragMan = getSupportFragmentManager();
                 DialogFragment fragment = new AddUserFragment();
@@ -212,7 +218,9 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
     }
     private void addToLog(){
         addToPrivateLog();
+        addToPublicVolatileLog();
         addToPublicLog();
+        addToPublicExternalLog();
     }
     private void addToPrivateLog(){
         try {
@@ -248,6 +256,47 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         }
         catch (Exception e) {
             Log.e(LOG_TAG, "Error saving public log "+e.getMessage()+" "+e.getCause());
+        }
+    }
+    private void addToPublicVolatileLog(){
+        if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+            return;
+        try {
+            File file = new File(getApplicationContext().getExternalFilesDir(
+                    Environment.DIRECTORY_DOCUMENTS), logfileName);
+            if (!file.exists())
+                file.createNewFile();
+            FileWriter fw = new FileWriter(file, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            if(presentQuestion.getAnswer())
+                bw.write(presentQuestion.getNumber() + " is a prime number.\n");
+            else
+                bw.write(presentQuestion.getNumber() + " is not a prime number.\n");
+            bw.close();
+            Log.v(LOG_TAG, "Added public volatile log successfully");
+        }
+        catch (Exception e) {
+            Log.e(LOG_TAG, "Error saving public volatile log "+e.getMessage()+" "+e.getCause());
+        }
+    }
+    private void addToPublicExternalLog(){
+        if(!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+            return;
+        try {
+            File file = new File(Environment.getExternalStorageDirectory(), logfileName);
+            if (!file.exists())
+                file.createNewFile();
+            FileWriter fw = new FileWriter(file, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            if(presentQuestion.getAnswer())
+                bw.write(presentQuestion.getNumber() + " is a prime number.\n");
+            else
+                bw.write(presentQuestion.getNumber() + " is not a prime number.\n");
+            bw.close();
+            Log.v(LOG_TAG, "Added public external log successfully");
+        }
+        catch (Exception e) {
+            Log.e(LOG_TAG, "Error saving public external log "+e.getMessage()+" "+e.getCause());
         }
     }
     @Override

@@ -4,6 +4,10 @@
         android:title="@string/viewPrivateLogs" />
     <item android:id="@+id/viewpubliclogs"
         android:title="@string/viewPublicLogs" />
+    <item android:id="@+id/viewpublicvolatilelogs"
+        android:title="@string/viewPublicVolatileLogs" />
+    <item android:id="@+id/viewpublicexternallogs"
+        android:title="@string/viewPublicExternalLogs" />
     <item android:id="@+id/adduser"
         android:title="@string/addUser" />
     <item android:id="@+id/switchuser"

@@ -13,6 +13,8 @@
     <string name="answerNonPrimeText">Not a prime number!</string>
     <string name="viewPrivateLogs">View Private Logs</string>
     <string name="viewPublicLogs">View Public Logs</string>
+    <string name="viewPublicVolatileLogs">View Public Volatile Logs</string>
+    <string name="viewPublicExternalLogs">View Public External Logs</string>
     <string name="addUser">Add User</string>
     <string name="switchUser">Switch User</string>
     <string name="deleteUser">Delete User</string>
