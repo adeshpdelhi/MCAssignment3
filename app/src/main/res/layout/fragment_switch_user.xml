@@ -10,11 +10,11 @@
         android:id="@+id/switchname"
         android:layout_centerHorizontal="true"
         android:minWidth="200dp"
-        android:hint="Enter name"/>
+        android:hint="@string/enterName"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Switch"
+        android:text="@string/switchText"
         android:id="@+id/switchuserbutton"
         android:layout_below="@id/switchname"
         android:layout_alignEnd="@id/switchname"/>

@@ -5,7 +5,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
@@ -21,20 +20,11 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.creation.adesh.mcassignment3.AddUserFragment;
-import com.creation.adesh.mcassignment3.UserContract;
-import com.creation.adesh.mcassignment3.UserDbHelper;
-import com.creation.adesh.mcassignment3.ViewLogsActivity;
-import com.creation.adesh.mcassignment3.User;
-import com.creation.adesh.mcassignment3.Question;
-import com.creation.adesh.mcassignment3.SwitchUserFragment;
-import com.creation.adesh.mcassignment3.UpdateProgressTask;
-import org.w3c.dom.Text;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 
+//Reference: developer.android.com
 
 public class MainActivity extends AppCompatActivity implements AddUserFragment.AddUser,SwitchUserFragment.SwitchUserListener{
     private static final String RCheated = "CHEATED";
@@ -44,7 +34,8 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
     private static final String RScore = "SCORE";
     private static final String logfileName = "quizlogs.txt";
     private static final String R_Id = "_ID";
-    private Long _ID = new Long(0);
+    private static final String LOG_TAG = "MainActivity";
+    private Long _ID = Long.valueOf(0);
     private User user = null;
     private UserDbHelper mUserDbHelper = null;
     private static TextView mQuestionText = null;
@@ -76,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         else
             addUser("default");
         score = sharedPref.getInt(RScore,0);
-        Log.v("MainActivity",score.toString());
         mScore.setText(score.toString());
         if(savedInstanceState == null) {
             presentQuestion= new Question();
@@ -92,7 +82,8 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
             firstAttempt = savedInstanceState.getBoolean(RFirstAttempt, true);
             score = savedInstanceState.getInt(RScore, 0);
         }
-
+        Log.v(LOG_TAG,"Score is "+number.toString());
+        Log.v(LOG_TAG,mQuestionText.toString());
         mQuestionText.setText(getString(R.string.questionText,number));
         addToLog();
     }
@@ -130,23 +121,14 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
     }
 
 
-    public void updateUserFromId(){
+    private void updateUserFromId(){
     SQLiteDatabase userDb = mUserDbHelper.getReadableDatabase();
     String columns[] = {UserContract.User._ID,UserContract.User.ColumnName,UserContract.User.ColumnHighScore};
     String selection = UserContract.User._ID + " = ?";
     String[] args = {_ID.toString() };
     String sort = UserContract.User._ID + " DESC";
-    Cursor c = userDb.query(
-            UserContract.User.tableName,                     // The table to query
-            columns,                               // The columns to return
-            selection,                                // The columns for the WHERE clause
-            args,                            // The values for the WHERE clause
-            null,                                     // don't group the rows
-            null,                                     // don't filter by row groups
-            sort                                // The sort order
-    );
+    Cursor c = userDb.query(UserContract.User.tableName, columns, selection, args,null,null,sort );
     if( c != null && c.moveToFirst() ) {
-
 
         String name = c.getString(
                 c.getColumnIndexOrThrow(UserContract.User.ColumnName)
@@ -164,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
 
     }
     else
-        Log.e("MainActivity", "Updation Error!");
+        Log.e(LOG_TAG, "UpdateUserFromId Updation Error!");
     }
 
     public void switchUser(String name){
@@ -174,17 +156,8 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         String selection = UserContract.User.ColumnName + " = ?";
         String[] args = { name };
         String sort = UserContract.User._ID + " DESC";
-        Cursor c = userDb.query(
-                UserContract.User.tableName,                     // The table to query
-                columns,                               // The columns to return
-                selection,                                // The columns for the WHERE clause
-                args,                            // The values for the WHERE clause
-                null,                                     // don't group the rows
-                null,                                     // don't filter by row groups
-                sort                                // The sort order
-        );
+        Cursor c = userDb.query(UserContract.User.tableName, columns, selection, args,null,null,sort );
         if( c != null && c.moveToFirst() ) {
-
 
             _ID = c.getLong(
                     c.getColumnIndexOrThrow(UserContract.User._ID)
@@ -201,12 +174,11 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
             mScore.setText(score.toString());
         }
         else
-            Log.e("MainActivity", "Updation Error!");
+            Log.e(LOG_TAG, "SwitchUser Updation Error!");
         next(null);
     }
 
     public void addUser(String name){
-       Log.v("MainActivity", "now i will add user "+name);
         SQLiteDatabase userDb = mUserDbHelper.getWritableDatabase();
         ContentValues newUserValues = new ContentValues();
         newUserValues.put(UserContract.User.ColumnName,name);
@@ -233,10 +205,10 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(presentQuestion.getNumber() + ": " + presentQuestion.getAnswer() + "\n");
             bw.close();
-            Log.v("Main Activity", "Added succesfully");
+            Log.v(LOG_TAG, "Added private log successfully");
         }
         catch (Exception e) {
-            Log.e("Main Activity", "Error saving private log");
+            Log.e(LOG_TAG, "Error saving private log");
         }
     }
     private void addToPublicLog(){
@@ -245,9 +217,6 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         try {
             File file = new File(Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DOCUMENTS), logfileName);
-//            if (!file.mkdirs()) {
-//                Log.e("MainActivity", "Directory cannot be created");
-//            }
             if (!file.exists())
                 file.createNewFile();
             FileWriter fw = new FileWriter(file, true);
@@ -257,10 +226,10 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
             else
                 bw.write(presentQuestion.getNumber() + " is not a prime number.\n");
             bw.close();
-            Log.v("Main Activity", "Added succesfully");
+            Log.v(LOG_TAG, "Added public log successfully");
         }
         catch (Exception e) {
-            Log.e("Main Activity", "Error saving public log "+e.getStackTrace()+" "+e.getMessage()+" "+e.getCause());
+            Log.e(LOG_TAG, "Error saving public log "+e.getMessage()+" "+e.getCause());
         }
     }
     @Override
@@ -327,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         i.putExtra(RCheated,mCheated);
         startActivityForResult(i,cheatRequestCode);
     }
-    public void updateProgress(){
+    private void updateProgress(){
         if(score>user.getHighScore())
             user.setHighScore(score);
         mHighScore.setText(user.getHighScore().toString());

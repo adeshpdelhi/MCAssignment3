@@ -24,7 +24,7 @@
         <activity
             android:name=".HintActivity"
             android:label="@string/hintText" />
-        <activity android:name="com.creation.adesh.mcassignment3.ViewLogsActivity"></activity>
+        <activity android:name="com.creation.adesh.mcassignment3.ViewLogsActivity"/>
     </application>
 
 </manifest>

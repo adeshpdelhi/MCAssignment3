@@ -6,20 +6,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.creation.adesh.mcassignment3.AddUserFragment;
-import com.creation.adesh.mcassignment3.UserContract;
-import com.creation.adesh.mcassignment3.UserDbHelper;
-import com.creation.adesh.mcassignment3.ViewLogsActivity;
-import com.creation.adesh.mcassignment3.User;
-import com.creation.adesh.mcassignment3.Question;
-import com.creation.adesh.mcassignment3.SwitchUserFragment;
-import com.creation.adesh.mcassignment3.UpdateProgressTask;
-
 /**
  * Created by adesh on 10/2/16.
  */
-public class UpdateProgressTask extends AsyncTask<User,Void,Void > {
-    Context context;
+class UpdateProgressTask extends AsyncTask<User,Void,Void > {
+    private final Context context;
     public UpdateProgressTask(Context context){
         this.context = context;
     }
@@ -31,7 +22,7 @@ public class UpdateProgressTask extends AsyncTask<User,Void,Void > {
             ContentValues newUserValues = new ContentValues();
             newUserValues.put(UserContract.User.ColumnHighScore,user.getHighScore());
             String columns = UserContract.User._ID+" =?";
-            String args[]= {user._ID.toString()};
+            String args[]= {user.get_ID().toString()};
             int count = userDb.update(
             UserContract.User.tableName,
             newUserValues,

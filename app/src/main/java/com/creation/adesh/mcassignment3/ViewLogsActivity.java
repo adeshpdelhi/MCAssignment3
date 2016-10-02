@@ -7,16 +7,15 @@ import android.util.Log;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 
 public class ViewLogsActivity extends AppCompatActivity {
 
 
     private static final String logfileName = "quizlogs.txt";
-    TextView mLogView = null;
+    private static final String LOG_TAG = "ViewLogsActivity";
+    private TextView mLogView = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,11 +44,10 @@ public class ViewLogsActivity extends AppCompatActivity {
         File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), logfileName);
         display(file);
     }
-    public void display(File file) {
+    private void display(File file) {
         try{
         if (!file.exists())
             file.createNewFile();
-        Log.v("Here", "here");
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
         String fileText = "";
@@ -57,15 +55,14 @@ public class ViewLogsActivity extends AppCompatActivity {
             String line;
             while ((line = br.readLine()) != null)
                 fileText = fileText + "\n" + line;
-//            Log.v("File Text: ", fileText);
         } else
-            Log.v("View logs", "NUll elemetn");
+            Log.v(LOG_TAG, "BufferedReader null!");
         mLogView.setText(fileText);
         br.close();
     }
         catch (Exception e) {
 
-            Log.e("View Logs Activity", "Error viewing log: "+e.getMessage()+" "+e.getCause()+" "+e.getStackTrace());
+            Log.e(LOG_TAG, "Error viewing log: "+e.getMessage()+" "+e.getCause());
         }
     }
 

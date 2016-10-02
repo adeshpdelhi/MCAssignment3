@@ -10,14 +10,14 @@ import com.creation.adesh.mcassignment3.UserContract.User;
 /**
  * Created by adesh on 10/1/16.
  */
-public class UserDbHelper extends SQLiteOpenHelper{
+class UserDbHelper extends SQLiteOpenHelper{
     private static final int DatabaseVersion = 4;
     private static final String DatabaseName = "User.db";
-    String createDbEntries = "create table "+ User.tableName+ "( "+
+    private final String createDbEntries = "create table "+ User.tableName+ "( "+
             User._ID+" integer primary key, "+
             User.ColumnName+" text, "+ User.ColumnHighScore+" integer);";
 
-    String deleteDbEntries = "drop table if exists "+User.tableName+" ;";
+    private final String deleteDbEntries = "drop table if exists "+User.tableName+" ;";
 
     public UserDbHelper(Context context) {
         super(context,DatabaseName,null ,DatabaseVersion);
