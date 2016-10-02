@@ -26,7 +26,7 @@ import java.io.FileWriter;
 
 //Reference: developer.android.com
 
-public class MainActivity extends AppCompatActivity implements AddUserFragment.AddUser,SwitchUserFragment.SwitchUserListener{
+public class MainActivity extends AppCompatActivity implements AddUserFragment.AddUser,SwitchUserFragment.SwitchUserListener,DeleteUserFragment.DeleteUserListener{
     private static final String RCheated = "CHEATED";
     private static final String RHinted = "HINT";
     private static final String RAnswer = "ANSWER";
@@ -62,16 +62,16 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         SharedPreferences sharedPref = this.getSharedPreferences("score", Context.MODE_PRIVATE);
 
         _ID = sharedPref.getLong(R_Id,0);
+        score = sharedPref.getInt(RScore,0);
         if(_ID!=0)
             updateUserFromId();
         else
             addUser("default");
-        score = sharedPref.getInt(RScore,0);
+
         mScore.setText(score.toString());
         if(savedInstanceState == null) {
             presentQuestion= new Question();
             number = presentQuestion.getNumber();
-            score=0;
         }
         else
         {
@@ -115,6 +115,11 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
                 fragment = new SwitchUserFragment();
                 fragment.show(fragMan,"Switch user");
                 return true;
+            case R.id.deleteuser:
+                fragMan = getSupportFragmentManager();
+                fragment = new DeleteUserFragment();
+                fragment.show(fragMan,"Delete user");
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -141,8 +146,6 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
 
         mUsername.setText(user.getName());
         mHighScore.setText(user.getHighScore().toString());
-        score = 0;
-        mScore.setText(score.toString());
 
     }
     else
@@ -185,7 +188,22 @@ public class MainActivity extends AppCompatActivity implements AddUserFragment.A
         newUserValues.put(UserContract.User.ColumnHighScore,0);
         _ID = userDb.insert(UserContract.User.tableName,null, newUserValues);
         updateUserFromId();
+        score = 0;
+        mScore.setText(score.toString());
         next(null);
+    }
+
+    public void deleteUser(String name){
+        if(name.equals(user.getName()))
+        {
+            Toast.makeText(getApplicationContext(),"Cannot delete present user!",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        SQLiteDatabase userDb = mUserDbHelper.getWritableDatabase();
+        String columns = UserContract.User.ColumnName+" like ?";
+        String[] args = { name };
+        userDb.delete(UserContract.User.tableName,columns,args);
+        Toast.makeText(getApplicationContext(),"User deleted successfully!",Toast.LENGTH_SHORT).show();
     }
     public void reset(View view){
         score = 0;
