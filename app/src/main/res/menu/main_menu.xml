@@ -4,4 +4,8 @@
         android:title="View Private Logs" />
     <item android:id="@+id/viewpubliclogs"
         android:title="View Public Logs" />
+    <item android:id="@+id/adduser"
+        android:title="Add User" />
+    <item android:id="@+id/switchuser"
+        android:title="Switch User" />
 </menu>

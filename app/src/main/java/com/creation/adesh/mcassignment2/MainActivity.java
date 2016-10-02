@@ -1,6 +1,12 @@
 package com.creation.adesh.mcassignment3;
 
 import android.app.Activity;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,8 +21,14 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.creation.adesh.mcassignment3.AddUserFragment;
+import com.creation.adesh.mcassignment3.UserContract;
+import com.creation.adesh.mcassignment3.UserDbHelper;
 import com.creation.adesh.mcassignment3.ViewLogsActivity;
-
+import com.creation.adesh.mcassignment3.User;
+import com.creation.adesh.mcassignment3.Question;
+import com.creation.adesh.mcassignment3.SwitchUserFragment;
+import com.creation.adesh.mcassignment3.UpdateProgressTask;
 import org.w3c.dom.Text;
 
 import java.io.BufferedWriter;
@@ -24,15 +36,21 @@ import java.io.File;
 import java.io.FileWriter;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AddUserFragment.AddUser,SwitchUserFragment.SwitchUserListener{
     private static final String RCheated = "CHEATED";
     private static final String RHinted = "HINT";
     private static final String RAnswer = "ANSWER";
     private static final String RFirstAttempt = "FIRSTATTEMPT";
     private static final String RScore = "SCORE";
     private static final String logfileName = "quizlogs.txt";
+    private static final String R_Id = "_ID";
+    private Long _ID = new Long(0);
+    private User user = null;
+    private UserDbHelper mUserDbHelper = null;
     private static TextView mQuestionText = null;
     private static TextView mScore = null;
+    private static TextView mUsername = null;
+    private static TextView mHighScore = null;
     private Integer number = null;
     private Question presentQuestion = null;
     private static final int cheatRequestCode = 0;
@@ -47,13 +65,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mQuestionText = (TextView) findViewById(R.id.questionText);
         mScore = (TextView) findViewById(R.id.score);
+        mUsername = (TextView) findViewById(R.id.username);
+        mHighScore = (TextView) findViewById(R.id.highscore);
+        mUserDbHelper = new UserDbHelper(getApplicationContext());
         SharedPreferences sharedPref = this.getSharedPreferences("score", Context.MODE_PRIVATE);
+
+        _ID = sharedPref.getLong(R_Id,0);
+        if(_ID!=0)
+            updateUserFromId();
+        else
+            addUser("default");
         score = sharedPref.getInt(RScore,0);
         Log.v("MainActivity",score.toString());
         mScore.setText(score.toString());
         if(savedInstanceState == null) {
             presentQuestion= new Question();
             number = presentQuestion.getNumber();
+            score=0;
         }
         else
         {
@@ -68,14 +96,14 @@ public class MainActivity extends AppCompatActivity {
         mQuestionText.setText(getString(R.string.questionText,number));
         addToLog();
     }
-
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         return true;
     }
-
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch(item.getItemId())
@@ -86,11 +114,107 @@ public class MainActivity extends AppCompatActivity {
             case R.id.viewpubliclogs:
                 startActivity(new Intent(this, ViewLogsActivity.class).putExtra("type","public"));
                 return true;
+            case R.id.adduser:
+                FragmentManager fragMan = getSupportFragmentManager();
+                DialogFragment fragment = new AddUserFragment();
+                fragment.show(fragMan,"Add a new user");
+                return true;
+            case R.id.switchuser:
+                fragMan = getSupportFragmentManager();
+                fragment = new SwitchUserFragment();
+                fragment.show(fragMan,"Switch user");
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+
+    public void updateUserFromId(){
+    SQLiteDatabase userDb = mUserDbHelper.getReadableDatabase();
+    String columns[] = {UserContract.User._ID,UserContract.User.ColumnName,UserContract.User.ColumnHighScore};
+    String selection = UserContract.User._ID + " = ?";
+    String[] args = {_ID.toString() };
+    String sort = UserContract.User._ID + " DESC";
+    Cursor c = userDb.query(
+            UserContract.User.tableName,                     // The table to query
+            columns,                               // The columns to return
+            selection,                                // The columns for the WHERE clause
+            args,                            // The values for the WHERE clause
+            null,                                     // don't group the rows
+            null,                                     // don't filter by row groups
+            sort                                // The sort order
+    );
+    if( c != null && c.moveToFirst() ) {
+
+
+        String name = c.getString(
+                c.getColumnIndexOrThrow(UserContract.User.ColumnName)
+        );
+        Integer highScore = c.getInt(
+                c.getColumnIndexOrThrow(UserContract.User.ColumnHighScore)
+        );
+
+        user = new User(_ID, name, highScore);
+
+        mUsername.setText(user.getName());
+        mHighScore.setText(user.getHighScore().toString());
+        score = 0;
+        mScore.setText(score.toString());
+
+    }
+    else
+        Log.e("MainActivity", "Updation Error!");
+    }
+
+    public void switchUser(String name){
+        updateProgress();
+        SQLiteDatabase userDb = mUserDbHelper.getReadableDatabase();
+        String columns[] = {UserContract.User._ID,UserContract.User.ColumnName,UserContract.User.ColumnHighScore};
+        String selection = UserContract.User.ColumnName + " = ?";
+        String[] args = { name };
+        String sort = UserContract.User._ID + " DESC";
+        Cursor c = userDb.query(
+                UserContract.User.tableName,                     // The table to query
+                columns,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                args,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sort                                // The sort order
+        );
+        if( c != null && c.moveToFirst() ) {
+
+
+            _ID = c.getLong(
+                    c.getColumnIndexOrThrow(UserContract.User._ID)
+            );
+            Integer highScore = c.getInt(
+                    c.getColumnIndexOrThrow(UserContract.User.ColumnHighScore)
+            );
+
+            user = new User(_ID,name, highScore);
+
+            mUsername.setText(user.getName());
+            mHighScore.setText(user.getHighScore().toString());
+            score = 0;
+            mScore.setText(score.toString());
+        }
+        else
+            Log.e("MainActivity", "Updation Error!");
+        next(null);
+    }
+
+    public void addUser(String name){
+       Log.v("MainActivity", "now i will add user "+name);
+        SQLiteDatabase userDb = mUserDbHelper.getWritableDatabase();
+        ContentValues newUserValues = new ContentValues();
+        newUserValues.put(UserContract.User.ColumnName,name);
+        newUserValues.put(UserContract.User.ColumnHighScore,0);
+        _ID = userDb.insert(UserContract.User.tableName,null, newUserValues);
+        updateUserFromId();
+        next(null);
+    }
     public void reset(View view){
         score = 0;
         next(null);
@@ -163,13 +287,16 @@ public class MainActivity extends AppCompatActivity {
     private void verifyAnswer(Boolean answer){
         if(presentQuestion.checkAnswer(answer)) {
             Toast.makeText(getApplicationContext(), "Correct Response!", Toast.LENGTH_SHORT).show();
-            if(firstAttempt)
+            if(firstAttempt) {
                 score++;
+                updateProgress();
+            }
             mScore.setText(score.toString());
         }
         else
             Toast.makeText(getApplicationContext(),"Incorrect Response!",Toast.LENGTH_SHORT).show();
         firstAttempt = false;
+
     }
 
 
@@ -200,14 +327,22 @@ public class MainActivity extends AppCompatActivity {
         i.putExtra(RCheated,mCheated);
         startActivityForResult(i,cheatRequestCode);
     }
-
+    public void updateProgress(){
+        if(score>user.getHighScore())
+            user.setHighScore(score);
+        mHighScore.setText(user.getHighScore().toString());
+        new UpdateProgressTask(getApplicationContext()).execute(user,null,null);
+    }
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+
         SharedPreferences sharedPref = this.getSharedPreferences("score", Context.MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor = sharedPref.edit();
         sharedEditor.putInt(RScore,score);
+        sharedEditor.putLong(R_Id,_ID);
         sharedEditor.commit();
+        updateProgress();
+        super.onDestroy();
     }
 
     @Override

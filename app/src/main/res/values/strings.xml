@@ -11,4 +11,7 @@
     <string name="questionText">%1$s is a prime number.</string>
     <string name="answerPrimeText">Prime number!</string>
     <string name="answerNonPrimeText">Not a prime number!</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
